@@ -1,0 +1,12 @@
+name: Epic
+description: High-level sprint grouping
+title: "[EPIC] "
+labels: ["epic"]
+body:
+  - type: textarea
+    attributes:
+      label: Goal
+      description: What this epic enables
+    validations:
+      required: true
+

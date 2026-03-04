@@ -1,0 +1,55 @@
+name: Release
+description: Release planning and coordination
+title: "[RELEASE] v"
+labels: ["release"]
+body:
+  - type: input
+    attributes:
+      label: Version
+      description: Target version number (e.g., 1.2.0)
+      placeholder: "1.2.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Release Type
+      description: Type of release based on changes
+      options:
+        - patch (bug fixes)
+        - minor (new features, backwards compatible)
+        - major (breaking changes)
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Release Goals
+      description: What this release aims to achieve
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Included Features/Tasks
+      description: List of tasks/features to be included in this release
+      placeholder: "- [ ] #123 Feature A\n- [ ] #124 Bug fix B\n- [ ] #125 Enhancement C"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Testing Requirements
+      description: Specific testing that needs to be completed before release
+      placeholder: "- [ ] Integration tests\n- [ ] Load testing\n- [ ] Security audit"
+
+  - type: input
+    attributes:
+      label: Target Date
+      description: Planned release date
+      placeholder: "2024-03-15"
+
+  - type: textarea
+    attributes:
+      label: Release Notes
+      description: Draft release notes for users
