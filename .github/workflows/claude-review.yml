@@ -11,60 +11,25 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Checkout PR
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
 
-      - name: Setup Claude Code
-        uses: anthropic/setup-claude-code@v1
-        with:
-          version: latest
-
-      - name: Run Review
+      - name: Run Claude Code Review
         env:
-          CLAUDE_TOKEN: ${{ secrets.CLAUDE_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get PR info
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_BODY="${{ github.event.pull_request.body }}"
-          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-
-          # Run Claude Code review
-          claude "
-          You are a code reviewer. Review the changes in this PR:
-
-          **PR Title:** $PR_TITLE
-          **PR Description:** $PR_BODY
-
-          1. Run 'git diff $BASE_BRANCH...' to see all changes
-          2. Review for: bugs, security issues, code quality, missing tests
-          3. Provide concise, actionable feedback
-
-          Format as:
-          ## Summary
-          [1-2 sentence overview]
-
-          ## Issues Found
-          - [Issue with file:line]
-
-          ## Suggestions
-          - [Optional improvements]
-          "
-        id: review
-
-      - name: Post Review Comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const review = `${{ steps.review.outputs.result }}`;
-            if (review && review.trim()) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: review
-              });
-            }
+          PR_NUM="${{ github.event.pull_request.number }}"
+          REPO="${{ github.repository }}"
+          
+          REVIEW_DIR=$(mktemp -d)
+          git clone "https://github.com/$REPO.git" "$REVIEW_DIR"
+          cd "$REVIEW_DIR"
+          
+          git fetch origin "pull/$PR_NUM/head:pr-review"
+          git checkout pr-review
+          
+          claude -p "/review https://github.com/$REPO/pull/$PR_NUM"
+          
+          cd /
+          rm -rf "$REVIEW_DIR"
